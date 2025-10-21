@@ -1,0 +1,24 @@
+.splash-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #f43f5e, #f59e0b);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: "Poppins", sans-serif;
+    animation: fadeOut 1s ease 1.5s forwards;
+}
+
+.splash-logo {
+    width: 100px;
+    margin-bottom: 20px;
+}
+
+@keyframes fadeOut {
+    to {
+    opacity: 0;
+    visibility: hidden;
+    }
+}
