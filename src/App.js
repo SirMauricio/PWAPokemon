@@ -1,85 +1,174 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import Splash from "./Splash";
-import PokemonCard from "./components/PokemonCard";
-
-const LIMITE_POR_PAGINA = 20;
 
 function App() {
   const [pokemons, setPokemons] = useState([]);
-  const [pagina, setPagina] = useState(0);
-  const [busqueda, setBusqueda] = useState("");
-  const [cargando, setCargando] = useState(true);
+  const [search, setSearch] = useState("");
+  const [offset, setOffset] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [selectedPokemon, setSelectedPokemon] = useState(null);
+  const limit = 20;
+
+  const typeColors = {
+    grass: "#78C850",
+    fire: "#F08030",
+    water: "#6890F0",
+    bug: "#A8B820",
+    normal: "#A8A878",
+    poison: "#A040A0",
+    electric: "#F8D030",
+    ground: "#E0C068",
+    fairy: "#EE99AC",
+    fighting: "#C03028",
+    psychic: "#F85888",
+    rock: "#B8A038",
+    ghost: "#705898",
+    ice: "#98D8D8",
+    dragon: "#7038F8",
+    dark: "#705848",
+    steel: "#B8B8D0",
+    flying: "#A890F0",
+  };
+
+  const fetchPokemons = async () => {
+    setLoading(true);
+    const res = await fetch(
+      `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`
+    );
+    const data = await res.json();
+
+    const detailedPokemons = await Promise.all(
+      data.results.map(async (p) => {
+        const res = await fetch(p.url);
+        const details = await res.json();
+        return {
+          id: details.id,
+          name: details.name,
+          type: details.types[0].type.name,
+          types: details.types.map((t) => t.type.name),
+          sprite: details.sprites.other["official-artwork"].front_default,
+          stats: details.stats,
+          abilities: details.abilities.map((a) => a.ability.name),
+        };
+      })
+    );
+
+    setPokemons(detailedPokemons);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchPokemons = async () => {
-      try {
-        setCargando(true);
-        const offset = pagina * LIMITE_POR_PAGINA;
-        const res = await fetch(
-          `https://pokeapi.co/api/v2/pokemon?limit=${LIMITE_POR_PAGINA}&offset=${offset}`
-        );
-        const data = await res.json();
-
-        const detalles = await Promise.all(
-          data.results.map(async (p) => {
-            const resDet = await fetch(p.url);
-            return await resDet.json();
-          })
-        );
-
-        setPokemons(detalles);
-        setCargando(false);
-      } catch (error) {
-        console.error("Error al obtener Pokémon:", error);
-        setCargando(false);
-      }
-    };
-
     fetchPokemons();
-  }, [pagina]);
+  }, [offset]);
 
-  const pokemonsFiltrados = pokemons.filter((p) =>
-    p.name.toLowerCase().includes(busqueda.toLowerCase())
+  const filteredPokemons = pokemons.filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSiguiente = () => setPagina((prev) => prev + 1);
-  const handleAnterior = () => setPagina((prev) => (prev > 0 ? prev - 1 : 0));
-
-  if (cargando) {
-    return <Splash onFinish={() => setCargando(false)} />;
-  }
-
   return (
-    <div className="contenedor">
-      <h1>PokéDex Api</h1>
+    <div className="app-container">
+      <h1 className="title">Pokédex API</h1>
 
       <input
         type="text"
-        className="buscador"
         placeholder="Buscar Pokémon..."
-        value={busqueda}
-        onChange={(e) => setBusqueda(e.target.value)}
+        className="search-input"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
       />
 
-      <div className="grid">
-        {pokemonsFiltrados.length > 0 ? (
-          pokemonsFiltrados.map((p) => <PokemonCard key={p.id} pokemon={p} />)
-        ) : (
-          <p>No se encontró ningún Pokémon UnU</p>
-        )}
-      </div>
+      {loading ? (
+        <p className="loading-text">Cargando Pokémon...</p>
+      ) : (
+        <div className="pokemon-grid">
+          {filteredPokemons.map((p) => (
+            <div
+              key={p.id}
+              className="pokemon-card"
+              style={{
+                background: `linear-gradient(145deg, ${typeColors[p.type]} 70%, #ffffff 100%)`,
+              }}
+              onClick={() => setSelectedPokemon(p)}
+            >
+              <img src={p.sprite} alt={p.name} className="pokemon-img" />
+              <h2>{p.name}</h2>
+              <p>#{p.id}</p>
+              <span className="pokemon-type">{p.type}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <div className="paginacion">
-        <button onClick={handleAnterior} disabled={pagina === 0}>
+      <div className="pagination">
+        <button
+          onClick={() => setOffset(Math.max(0, offset - limit))}
+          disabled={offset === 0}
+        >
           ◀ Anterior
         </button>
-        <span>Página {pagina + 1}</span>
-        <button onClick={handleSiguiente}>Siguiente ▶</button>
+        <button onClick={() => setOffset(offset + limit)}>Siguiente ▶</button>
       </div>
+
+      {selectedPokemon && (
+        <div className="modal" onClick={() => setSelectedPokemon(null)}>
+          <div
+            className="modal-content"
+            style={{
+              background: `linear-gradient(145deg, ${
+                typeColors[selectedPokemon.type]
+              } 60%, #ffffff 100%)`,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="close-btn"
+              onClick={() => setSelectedPokemon(null)}
+            >
+              ✖
+            </button>
+            <img
+              src={selectedPokemon.sprite}
+              alt={selectedPokemon.name}
+              className="modal-img"
+            />
+            <h2>{selectedPokemon.name}</h2>
+            <p className="pokemon-id">#{selectedPokemon.id}</p>
+
+            <div className="modal-section">
+              <h3>Tipo</h3>
+              <div className="type-list">
+                {selectedPokemon.types.map((t) => (
+                  <span key={t} className="pokemon-type">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="modal-section">
+              <h3>Estadísticas</h3>
+              <ul>
+                {selectedPokemon.stats.map((s) => (
+                  <li key={s.stat.name}>
+                    {s.stat.name.toUpperCase()}: {s.base_stat}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="modal-section">
+              <h3>Habilidades</h3>
+              <ul>
+                {selectedPokemon.abilities.map((a) => (
+                  <li key={a}>{a}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default App;
-

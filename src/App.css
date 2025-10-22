@@ -1,68 +1,207 @@
 body {
-  margin: 0;
   font-family: "Poppins", sans-serif;
-  background-color: #f3f4f6;
-  color: #222;
+  background: linear-gradient(180deg, #ee1515  0%, #f0f0f0 100%);
+  margin: 0;
+  padding: 0;
+}
+
+.app-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
   text-align: center;
 }
 
-.contenedor {
-  padding: 2rem;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.buscador {
-  width: 80%;
-  max-width: 400px;
-  padding: 10px 15px;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  font-size: 1rem;
+.title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
   margin-bottom: 1.5rem;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  border-radius: 2rem;
+  border: none;
   outline: none;
-  transition: 0.2s;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  margin-bottom: 2rem;
 }
 
-.buscador:focus {
-  border-color: #f43f5e;
-  box-shadow: 0 0 5px rgba(244, 63, 94, 0.3);
+.pokemon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.5rem;
+  justify-items: center;
 }
 
-.paginacion {
+.pokemon-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 1rem;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  width: 160px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.pokemon-card:hover {
+  transform: scale(1.07);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.pokemon-img {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 0.5rem;
+}
+
+.pokemon-card h2 {
+  font-size: 1.1rem;
+  text-transform: capitalize;
+  margin: 0.3rem 0;
+  color: white;
+}
+
+.pokemon-card p {
+  font-size: 0.85rem;
+  margin: 0;
+  color: #f2f2f2;
+}
+
+.pokemon-type {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 0.2rem 0.7rem;
+  border-radius: 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.pagination {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 15px;
-  margin-top: 20px;
+  margin-top: 2rem;
+  gap: 1rem;
 }
 
-.paginacion button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 12px;
-  background-color: #f43f5e;
+.pagination button {
+  background: #ebce3d;
   color: white;
-  font-weight: bold;
+  border: none;
+  border-radius: 2rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
   cursor: pointer;
-  transition: 0.2s;
+  transition: background 0.3s, transform 0.2s;
 }
 
-.paginacion button:disabled {
-  background-color: #ccc;
+.pagination button:hover {
+  background: #d83818;
+  transform: scale(1.05);
+}
+
+.pagination button:disabled {
+  background: #a1a1a1;
   cursor: not-allowed;
 }
 
-.paginacion button:hover:not(:disabled) {
-  background-color: #d23c55;
+.loading-text {
+  font-size: 1.2rem;
+  color: white;
+  font-weight: 500;
 }
 
-.paginacion span {
-  font-weight: bold;
-  font-size: 1rem;
+/* ... estilos anteriores ... */
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  position: relative;
+  background: white;
+  color: white;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px 10px;
+  color: white;
+}
+
+.modal-img {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+}
+
+.modal-section {
+  margin-top: 1rem;
+}
+
+.modal-section h3 {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+  color: white;
+}
+
+.modal-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.modal-section li {
+  margin: 3px 0;
+}
+
+.type-list {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+@keyframes fadeIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
