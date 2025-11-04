@@ -94,15 +94,38 @@ function App() {
     localStorage.setItem("favoritos", JSON.stringify(nuevosFavoritos));
   };
 
-  useEffect(() => {
-    const guardados = localStorage.getItem("favoritos");
-    if (guardados) setFavoritos(JSON.parse(guardados));
-  }, []);
+useEffect(() => {
+  const fetchPokemons = async () => {
+    setLoading(true);
+    const res = await fetch(
+      `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`
+    );
+    const data = await res.json();
 
-  useEffect(() => {
-    fetchPokemons();
-  }, [offset]);
-  
+    const detailedPokemons = await Promise.all(
+      data.results.map(async (p) => {
+        const res = await fetch(p.url);
+        const details = await res.json();
+        return {
+          id: details.id,
+          name: details.name,
+          type: details.types[0].type.name,
+          types: details.types.map((t) => t.type.name),
+          sprite: details.sprites.other["official-artwork"].front_default,
+          stats: details.stats,
+          abilities: details.abilities.map((a) => a.ability.name),
+        };
+      })
+    );
+
+    setPokemons(detailedPokemons);
+    setLoading(false);
+  };
+
+  fetchPokemons();
+}, [offset]);
+
+
   const filteredPokemons = pokemons.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
   );
