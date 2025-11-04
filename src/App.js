@@ -7,6 +7,7 @@ function App() {
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
   const [selectedPokemon, setSelectedPokemon] = useState(null);
+  const [favoritos, setFavoritos] = useState([]);
   const limit = 20;
 
   const typeColors = {
@@ -57,10 +58,51 @@ function App() {
     setLoading(false);
   };
 
+  const mostrarNotificacionLocal = async (pokemon) => {
+    if (!("Notification" in window)) {
+      console.log("Este navegador no soporta notificaciones.");
+      return;
+    }
+
+    if (Notification.permission === "granted") {
+      new Notification("¡Nuevo Pokémon favorito agregado! ❤️", {
+        body: `${pokemon.name.toUpperCase()} fue agregado a tus favoritos.`,
+        icon: pokemon.sprite,
+      });
+    } else {
+      const permiso = await Notification.requestPermission();
+      if (permiso === "granted") {
+        new Notification("¡Notificaciones activadas! 🎉", {
+          body: "Ahora recibirás alertas al agregar favoritos.",
+        });
+      }
+    }
+  };
+
+  const toggleFavorito = (pokemon) => {
+    const esFavorito = favoritos.some((f) => f.id === pokemon.id);
+    let nuevosFavoritos;
+
+    if (esFavorito) {
+      nuevosFavoritos = favoritos.filter((f) => f.id !== pokemon.id);
+    } else {
+      nuevosFavoritos = [...favoritos, pokemon];
+      mostrarNotificacionLocal(pokemon);
+    }
+
+    setFavoritos(nuevosFavoritos);
+    localStorage.setItem("favoritos", JSON.stringify(nuevosFavoritos));
+  };
+
+  useEffect(() => {
+    const guardados = localStorage.getItem("favoritos");
+    if (guardados) setFavoritos(JSON.parse(guardados));
+  }, []);
+
   useEffect(() => {
     fetchPokemons();
   }, [offset]);
-
+  
   const filteredPokemons = pokemons.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -88,12 +130,20 @@ function App() {
               style={{
                 background: `linear-gradient(145deg, ${typeColors[p.type]} 70%, #ffffff 100%)`,
               }}
-              onClick={() => setSelectedPokemon(p)}
             >
               <img src={p.sprite} alt={p.name} className="pokemon-img" />
               <h2>{p.name}</h2>
               <p>#{p.id}</p>
               <span className="pokemon-type">{p.type}</span>
+
+              <button
+                className={`fav-btn ${
+                  favoritos.some((f) => f.id === p.id) ? "fav-active" : ""
+                }`}
+                onClick={() => toggleFavorito(p)}
+              >
+                {favoritos.some((f) => f.id === p.id) ? "❤️" : "🤍"} Favorito
+              </button>
             </div>
           ))}
         </div>

@@ -205,3 +205,16 @@ body {
     opacity: 1;
   }
 }
+
+.fav-btn {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.fav-active {
+  color: red;
+}
+
