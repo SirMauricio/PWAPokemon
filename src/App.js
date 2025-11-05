@@ -58,27 +58,6 @@ function App() {
     setLoading(false);
   };
 
-  const mostrarNotificacionLocal = async (pokemon) => {
-    if (!("Notification" in window)) {
-      console.log("Este navegador no soporta notificaciones.");
-      return;
-    }
-
-    if (Notification.permission === "granted") {
-      new Notification("¡Nuevo Pokémon favorito agregado! ❤️", {
-        body: `${pokemon.name.toUpperCase()} fue agregado a tus favoritos.`,
-        icon: pokemon.sprite,
-      });
-    } else {
-      const permiso = await Notification.requestPermission();
-      if (permiso === "granted") {
-        new Notification("¡Notificaciones activadas! 🎉", {
-          body: "Ahora recibirás alertas al agregar favoritos.",
-        });
-      }
-    }
-  };
-
   const toggleFavorito = (pokemon) => {
     const esFavorito = favoritos.some((f) => f.id === pokemon.id);
     let nuevosFavoritos;
@@ -124,6 +103,27 @@ useEffect(() => {
 
   fetchPokemons();
 }, [offset]);
+
+useEffect(() => {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/service-worker.js")
+      .then(() => console.log("Service Worker registrado"))
+      .catch((err) => console.error("Error al registrar SW:", err));
+  }
+}, []);
+
+const mostrarNotificacionLocal = async (pokemon) => {
+  if ("serviceWorker" in navigator && "Notification" in window) {
+    const permiso = await Notification.requestPermission();
+    if (permiso === "granted") {
+      const registration = await navigator.serviceWorker.ready;
+      registration.showNotification("¡Nuevo Pokémon favorito! ❤️", {
+        body: `${pokemon.name.toUpperCase()} fue agregado a tus favoritos.`,
+        icon: pokemon.sprite,
+      });
+    }
+  }
+};
 
 
   const filteredPokemons = pokemons.filter((p) =>
@@ -171,6 +171,8 @@ useEffect(() => {
           ))}
         </div>
       )}
+
+      
 
       <div className="pagination">
         <button
